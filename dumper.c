@@ -116,7 +116,7 @@ static unsigned char read_prg_byte(uint16_t address)
   PHI2_HI;
   set_romsel(address); // set /ROMSEL low if need
   set_coolboy_rd(address); // COOLBOY's /oe low if need
-  _delay_us(1);
+  //_delay_us(1);
   uint8_t result = PIND;
   ROMSEL_HI;
   set_coolboy_rd(0);
