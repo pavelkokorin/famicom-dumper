@@ -368,17 +368,17 @@ static void write_flash(uint16_t address, uint16_t len, uint8_t* data)
 
     if (count)
     {
-      //write_prg_flash_command(0x0000, 0xF0);
+      write_prg_flash_command(0x0000, 0xF0);
       write_prg_flash_command(0x0AAA, 0xAA);
       write_prg_flash_command(0x0555, 0x55);
-      write_prg_flash_command(address, 0x25);
-      write_prg_flash_command(address, count-1);
+      write_prg_flash_command(0x0000, 0x25);
+      write_prg_flash_command(0x0000, count-1);
 
       while (count > 0)
       {
         if (*data != 0xFF)
         {
-          write_prg_flash_command(address, *data);
+          write_prg_flash_command(0x0000, *data);
           last_address = address;
           last_data = *data;
           count--;
@@ -387,7 +387,7 @@ static void write_flash(uint16_t address, uint16_t len, uint8_t* data)
         data++;
       }
     
-      write_prg_flash_command(address, 0x29);
+      write_prg_flash_command(0x0000, 0x29);
 
       TCNT1 = 0;
       // waiting for result
