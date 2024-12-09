@@ -116,7 +116,7 @@ static unsigned char read_prg_byte(uint16_t address)
   PHI2_HI;
   set_romsel(address); // set /ROMSEL low if need
   set_coolboy_rd(address); // COOLBOY's /oe low if need
-  //_delay_us(1);
+  _delay_us(1);
   uint8_t result = PIND;
   ROMSEL_HI;
   set_coolboy_rd(0);
@@ -378,7 +378,7 @@ static void write_flash(uint16_t address, uint16_t len, uint8_t* data)
       {
         if (*data != 0xFF)
         {
-          write_prg_flash_command(0x0000, *data);
+          write_prg_flash_command(address, *data);
           last_address = address;
           last_data = *data;
           count--;
