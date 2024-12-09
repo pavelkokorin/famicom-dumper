@@ -116,20 +116,18 @@ static unsigned char read_prg_byte(uint16_t address)
   PHI2_HI;
   set_romsel(address); // set /ROMSEL low if need
   set_coolboy_rd(address); // COOLBOY's /oe low if need
-  //_delay_us(1);
+  _delay_us(1);
   uint8_t result = PIND;
   ROMSEL_HI;
   set_coolboy_rd(0);
   return result;
 }
 
-static void pulse_phi2()
+static inline void pulse_phi2()
 {
-  uint8_t i = 0;
   PHI2_LOW;
-  while(++i < 2);
+  _delay_us(1);
   PHI2_HI;
-  while(++i < 5);
 }
 
 static unsigned char read_chr_byte(uint16_t address)
@@ -152,7 +150,6 @@ static void read_prg_send(uint16_t address, uint16_t len)
   comm_start(COMMAND_PRG_READ_RESULT, len);
   while (len > 0)
   {
-    pulse_phi2();
     comm_send_byte(read_prg_byte(address));
     len--;
     address++;
@@ -167,7 +164,6 @@ static void read_chr_send(uint16_t address, uint16_t len)
   comm_start(COMMAND_CHR_READ_RESULT, len);
   while (len > 0)
   {
-    pulse_phi2();
     comm_send_byte(read_chr_byte(address));
     len--;
     address++;
@@ -186,7 +182,6 @@ static void read_prg_crc_send(uint16_t address, uint16_t len)
   set_romsel(address); // set /ROMSEL low if need
   while (len > 0)
   {
-    pulse_phi2();
     PORTA = address & 0xFF;
     PORTC = (address >> 8) & 0xFF;
     _delay_us(1);
@@ -208,7 +203,6 @@ static void read_chr_crc_send(uint16_t address, uint16_t len)
   uint16_t crc = 0;
   while (len > 0)
   {
-    pulse_phi2();
     crc = calc_crc16(crc, read_chr_byte(address));
     len--;
     address++;
@@ -823,33 +817,34 @@ int main (void)
   
   while (1)
   {
-//    // PWM for leds
-//    TCCR1A |= (1<<COM1C1) | (1<<COM1B1) | (1<<WGM10);
-//    TCCR1B = 1<<CS10; // no prescaler
-//    if (t++ >= 10000)
-//    {
-//      if (!led_down)
-//      {
-//        led_bright++;
-//        if (led_bright >= 110) led_down = 1;
-//      } else {
-//        led_bright--;
-//        if (!led_bright) led_down = 0;
-//      }
-//      if (led_bright >= 100) OCR1B = led_bright - 100;
-//      if (led_down)
-//      {
-//        int led_bright2 = 110-led_bright;
-//        if (led_bright2 <= 20)
-//        {
-//          if (led_bright2 > 10) led_bright2 = 20 - led_bright2;
-//          OCR1C = led_bright2*2;
-//        }
-//      }
-//      t = 0;
-//    }
-    
+    // PWM for leds
+    TCCR1A |= (1<<COM1C1) | (1<<COM1B1) | (1<<WGM10);
+    TCCR1B = 1<<CS10; // no prescaler
+    if (t++ >= 10000)
+    {
+      if (!led_down)
+      {
+        led_bright++;
+        if (led_bright >= 110) led_down = 1;
+      } else {
+        led_bright--;
+        if (!led_bright) led_down = 0;
+      }
+      if (led_bright >= 100) OCR1B = led_bright - 100;
+      if (led_down)
+      {
+        int led_bright2 = 110-led_bright;
+        if (led_bright2 <= 20)
+        {
+          if (led_bright2 > 10) led_bright2 = 20 - led_bright2;
+          OCR1C = led_bright2*2;
+        }
+      }
+      t = 0;
+    }
+
     pulse_phi2();
+
     if (comm_recv_done)
     {
       comm_recv_done = 0;
