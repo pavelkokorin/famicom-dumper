@@ -842,9 +842,9 @@ int main (void)
       }
       t = 0;
     }
-
+    
     pulse_phi2();
-
+    
     if (comm_recv_done)
     {
       comm_recv_done = 0;
